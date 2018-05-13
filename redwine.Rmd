@@ -91,7 +91,7 @@ ggplot(data=red, aes(x=quality)) +
 ```
 
 There is no outliers here. Minimum value is 3, maximum value is 8. We can see
-most of the wines are stacked arounf 5-6 and a little bit of 7.
+most of the wines are stacked around 5-6 and a little bit of 7.
 
 
 ## Fixed Acidity
@@ -363,15 +363,26 @@ acid has many zero values.
 
 ```{r echo=FALSE}
 ggcorr(red[, 2:13], 
+       palette = "RdGy",
+       hjust = 0.9,
+       size = 5,
        nbreaks = 6, 
        label_round = 2, 
        label = TRUE, 
-       label_size = 3)
+       layout.exp = 3,
+       label_size = 3) + 
+  labs(title="Correlation of parameters")
 ```
 
 First we check all the variables for correlation. We see which variables are
 strongly corelated with each other. This function is found from this website
 https://briatte.github.io/ggcorr/
+
+Inspecting this, we can see alcohol level strongly correlated with quality, 
+citric acid and sulphates also have slight positive correlation, volatile
+acidity on the other hand has negative correlation. The other variables do not
+have significant correlations. So if I want to make a model, I will most
+probably use these 3 variables, alcohol level, volatile acidity and sulphates.
 
 
 
@@ -385,7 +396,8 @@ ggplot(aes(factor(quality),
                geom = "point", 
                color = "red", 
                shape = 8, 
-               size = 4)
+               size = 4) + 
+   labs(title="Alcohol content ~ Quality of Wine")
 ```
 
 I want to first investigate relation of alcohol content and quality of the wine.
@@ -407,7 +419,8 @@ ggplot(aes(factor(quality),
                geom = "point", 
                color = "red", 
                shape = 8, 
-               size = 4)
+               size = 4) + 
+   labs(title="Volatile Acidity ~ Quality of Wine")
 ```
 
 This shows the relationship between volatile acidity and quality. More volatile
@@ -459,13 +472,36 @@ ggplot(data = red, aes(volatile.acidity, alcohol, color = as.factor(quality))) +
 geom_smooth(method = "lm", se = FALSE,size=1)
 ```
 
+I am first inspecting the effect of alcohol and Volatile acidity in quality of
+wine. These two variables are the ones that have the most correlation value.
+Alcohol positively correlates with quality of wine whereas, volatile acidity
+negatively correlates. Plotting the graph we can immediately see the strong
+relation of alcohol content and quality of the wine as the lines are stacked 
+above each other according to the quality. On the other hand Volatile acidity
+is more scattered. But it is still possible to see it is negatively correlated
+with quality of wine, as the lines of better quality wine are located on the
+left side of the graph. And finally by looking at the graph I though alcohol and
+volatile acidity levels are positively correlated, but checking the correlations
+table shows the opposite of this, these two variables are negatively correlated.
+But at least we can see here for the best quality of wines, there is a strong
+positive correlation.
+
 ```{r echo=FALSE, Multivariate_Plot2}
-ggplot(data = red, aes(volatile.acidity, fixed.acidity, color=as.factor(quality))) +
+ggplot(data = red, aes(volatile.acidity, citric.acid, color=as.factor(quality))) +
   geom_point() +
   scale_color_brewer(palette = 7) +
   geom_smooth(method = "lm", se = FALSE,size=1)
 
 ```
+
+Here this time I am looking at the relationship of volatile acidity and citric
+acid levels with quality of wines. Here immediately we can see a very linear
+strong negative correlation between citric acid and volatile acidity. And what
+we can see here again is there are a lot of 0s for citric acid, as it is banned
+in EU. It is not very clear but we can almost sense the negative correlation
+of volatile acidity and wine quality as the bands of quality 6, 7, 8 are more to
+the left of the 3, 4, 5.
+
 
 ```{r echo=FALSE, Multivariate_Plot3}
 ggplot(data = red, aes(sulphates, alcohol, color=as.factor(quality))) +
@@ -476,8 +512,10 @@ ggplot(data = red, aes(sulphates, alcohol, color=as.factor(quality))) +
 geom_smooth(method = "lm", se = FALSE,size=1)
 ```
 
-
-
+The last observation is for alcohol and sulphates. Both have a positive 
+correlation with the quality of a wine. We can see this as the color of dots
+gets darker as we go towards to the up right corner compared to the bottom left
+corner. 
 
 
 # Multivariate Analysis
@@ -502,9 +540,21 @@ and volatile acidity, the affect of others are not so clear.
 ### OPTIONAL: Did you create any models with your dataset? Discuss the \
 strengths and limitations of your model.
 
-No I havent created a model.
+
+So as I discussed earlier I can use these 3 variables, alcohol level, volatile
+acidity and sulphates. I think these 3 are enough to have a meaningful value to
+make a linear model. I put the variables in linear model. The results show I
+have an F value that is greater than 1 so there is a relationship. My r squared
+value is 0.33 which is not very good but still it show a weak relationship.
+I wont be spending too much time on this, as this is a topic for later course.
+And wine quality is a very complicated task to fit into a model.
+
+(referrence: https://www.r-bloggers.com/how-to-apply-linear-regression-in-r/)
 
 ```{r}
+fit <- lm(red$quality ~ red$alcohol 
+          + red$volatile.acidity + red$sulphates, data=red)
+summary(fit) 
 
 ```
 ------
@@ -556,10 +606,14 @@ interesting case of wines with rating 5. They are the ones with the lowest mean.
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
 ggcorr(red[, 2:13], 
+       palette = "RdGy",
+       hjust = 0.9,
+       size = 5,
        nbreaks = 6, 
        label_round = 2, 
        label = TRUE, 
-       label_size = 3)+
+       layout.exp = 3,
+       label_size = 3) + 
   labs(title="Correlation of parameters")
 
 ```
@@ -575,6 +629,9 @@ acidity parameters.
 
 
 ------
+
+
+
 
 # Reflection
 
